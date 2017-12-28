@@ -39,6 +39,9 @@ int main()
 		char *ip = inet_ntoa(cli_addr.sin_addr);
 		printf("client ip:%s\n",ip);
 		printf("%d\n",cli_addr.sin_port);
+		char buf[1024];
+		strcpy(buf,"HTTP/1.1 200 OK\r\n");
+		send(new_sock_id,buf,strlen(buf),0);
 		return 1;
 	}
 	return 0;
