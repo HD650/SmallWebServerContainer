@@ -7,6 +7,30 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+using namespace std;
+
+bool return_file(int client, char* file_name)
+{
+	FILE* return_file=fopen(file_name,"r");
+	if(return_file==NULL)
+	{
+		printf("can not open file.\n");
+		exit(1);
+	}
+	char return_buf[1024];
+	fgets(return_buf,sizeof(return_buf),return_file);
+	while(!feof(return_file))
+	{
+		send(client,return_buf,strlen(return_buf),0);
+		fgets(return_buf,sizeof(return_buf),return_file);
+	}
+	if(fclose(return_file))
+	{
+		printf("can not close file.\n");
+		exit(1);
+	}
+}
+
 int main()
 {
 	printf("Start a socket.\n");
@@ -40,9 +64,15 @@ int main()
 		printf("client ip:%s\n",ip);
 		printf("%d\n",cli_addr.sin_port);
 		char buf[1024];
-		strcpy(buf,"HTTP/1.1 200 OK\r\n");
+		strcpy(buf,"HTTP/1.0 200 OK\r\n");
 		send(new_sock_id,buf,strlen(buf),0);
-		return 1;
-	}
+		sprintf(buf, "Content-Type: text/html\r\n");
+    	send(new_sock_id, buf, strlen(buf), 0);
+		//strcpy(buf, "\r\n");
+    	//send(new_sock_id, buf, strlen(buf), 0);
+		return_file(new_sock_id,"index.html");
+		close(new_sock_id);
+	}	
+	close(sock_id);
 	return 0;
 }
