@@ -18,11 +18,10 @@ bool return_file(int client, char* file_name)
 		exit(1);
 	}
 	char return_buf[1024];
-	fgets(return_buf,sizeof(return_buf),return_file);
 	while(!feof(return_file))
 	{
-		send(client,return_buf,strlen(return_buf),0);
 		fgets(return_buf,sizeof(return_buf),return_file);
+		send(client,return_buf,strlen(return_buf),0);
 	}
 	if(fclose(return_file))
 	{
@@ -67,9 +66,9 @@ int main()
 		strcpy(buf,"HTTP/1.0 200 OK\r\n");
 		send(new_sock_id,buf,strlen(buf),0);
 		sprintf(buf, "Content-Type: text/html\r\n");
-    	send(new_sock_id, buf, strlen(buf), 0);
-		//strcpy(buf, "\r\n");
-    	//send(new_sock_id, buf, strlen(buf), 0);
+		send(new_sock_id, buf, strlen(buf), 0);
+		strcpy(buf, "\r\n");
+		send(new_sock_id, buf, strlen(buf), 0);
 		return_file(new_sock_id,"index.html");
 		close(new_sock_id);
 	}	
