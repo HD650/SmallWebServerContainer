@@ -12,18 +12,30 @@ using namespace std;
 
 void return_file(int client, char* file_name)
 {
-	FILE* return_file=fopen(file_name,"r");
+	FILE* return_file=fopen(file_name,"rb");
 	if(return_file==NULL)
 	{
 		printf("can not open file.\n");
 		exit(1);
 	}
+
+	int file_length=0;
+	fseek(return_file,0,SEEK_END);
+	file_length=ftell(return_file);
+	printf("file size:%d bytes.\n",file_length);
+	fseek(return_file,0,SEEK_SET);
+	
 	char return_buf[1024];
-	while(!feof(return_file))
+	int send_count=0;
+	int curr_send=0;
+	while(send_count<file_length)
 	{
-		fgets(return_buf,sizeof(return_buf),return_file);
-		send(client,return_buf,strlen(return_buf),0);
+		curr_send=fread(return_buf,1,sizeof(return_buf),return_file);
+		send(client,return_buf,curr_send,0);
+		send_count+=curr_send;
+		printf("already send %d bytes to client.\n",send_count);
 	}
+
 	if(fclose(return_file))
 	{
 		printf("can not close file.\n");
@@ -115,16 +127,16 @@ int main()
 		new_sock_id=accept(sock_id,(struct sockaddr*)&cli_addr,&cli_length);
 		char method[255],path[512];
 		parse_url(method,path,new_sock_id);
-		//printf("method: %s\n",method);
-		//printf("path: %s\n",path);
+		printf("method: %s\n",method);
+		printf("path: %s\n",path);
 		char *ip = inet_ntoa(cli_addr.sin_addr);
 		//printf("client ip:%s\n",ip);
 		//printf("%d\n",cli_addr.sin_port);
 		char buf[1024];
 		strcpy(buf,"HTTP/1.0 200 OK\r\n");
 		send(new_sock_id,buf,strlen(buf),0);
-		sprintf(buf, "Content-Type: text/html\r\n");
-		send(new_sock_id, buf, strlen(buf), 0);
+		//sprintf(buf, "Content-Type: text/html\r\n");
+		//send(new_sock_id, buf, strlen(buf), 0);
 		strcpy(buf, "\r\n");
 		send(new_sock_id, buf, strlen(buf), 0);
 		return_file(new_sock_id,&path[1]);
