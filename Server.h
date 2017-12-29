@@ -2,18 +2,21 @@
 #define SERVER_H
 
 #include "util.h"
+#include "thread.h"
 #include <exception>
 
 using namespace std;
 
 struct worker_param
 {
-	worker_param(int& _cli_sock,struct sockaddr_in& _cli_addr)
+	worker_param(int& _cli_sock,struct sockaddr_in& _cli_addr,pthread_t& _pid)
 	{
 		cli_sock=_cli_sock;
 		cli_addr=_cli_addr;
+		pid=_pid;
 	};
 	int cli_sock;
+	pthread_t pid;
 	struct sockaddr_in cli_addr;
 };
 
@@ -29,7 +32,8 @@ private:
 	size_t port,queue_len;
 	int listen_sock;
 	struct sockaddr_in serv_addr;
-	void* worker(void* param);
 };
+
+void* worker(void* param);
 
 #endif

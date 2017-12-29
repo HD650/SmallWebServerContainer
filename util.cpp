@@ -5,14 +5,14 @@ bool return_file(int client, char* file_name)
 	FILE* file=fopen(file_name,"rb");
 	if(file==NULL)
 	{
-		printf("can not open file.\n");
+		//printf("can not open file.\n");
 		return false;
 	}
 
 	int file_length=0;
 	fseek(file,0,SEEK_END);
 	file_length=ftell(file);
-	printf("file size:%d bytes.\n",file_length);
+	//printf("file size:%d bytes.\n",file_length);
 	fseek(file,0,SEEK_SET);
 	
 	char return_buf[1024];
@@ -23,7 +23,7 @@ bool return_file(int client, char* file_name)
 		curr_send=fread(return_buf,1,sizeof(return_buf),file);
 		send(client,return_buf,curr_send,0);
 		send_count+=curr_send;
-		printf("already send %d bytes to client.\n",send_count);
+		//printf("already send %d bytes to client.\n",send_count);
 	}
 
 	if(fclose(file))

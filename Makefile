@@ -1,10 +1,10 @@
 CC=g++
-CFLAGS=-g -I.
+CFLAGS= -std=c++11 -g -I. -lpthread
 DEPS = Server.h util.h
 OBJ = main.o Server.o util.o 
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c $(CFLAGS) -o $@ $< 
 
 main: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)

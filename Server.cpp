@@ -28,8 +28,12 @@ void Server::start_server()
 			int cli_sock;
 			unsigned int cli_length;
 			cli_sock=accept(listen_sock,(struct sockaddr*)&cli_addr,&cli_length);
-			struct worker_param cli_param(cli_sock,cli_addr);
-			this->worker((void*)&cli_param);
+			
+			pthread_t pid;
+
+			struct worker_param cli_param(cli_sock,cli_addr,pid);
+			//this->worker((void*)&cli_param);
+			pthread_create(&pid,NULL,worker,(void*)&cli_param);
 		}
 	}
 	catch(exception& error)
@@ -40,14 +44,14 @@ void Server::start_server()
 	return;
 }
 
-void* Server::worker(void* param)
+void* worker(void* param)
 {
 	struct worker_param input=*((struct worker_param*)param);
 	char method[8],path[1024];
 	
 	parse_url(method,path,input.cli_sock);
-	printf("method: %s\n",method);
-	printf("path: %s\n",path);
+	//printf("[thread%d]method: %s\n",input.pid,method);
+	//printf("[thread%d]path: %s\n",input.pid,path);
 	
 	char *ip = inet_ntoa(input.cli_addr.sin_addr);
 	//printf("client ip:%s\n",ip);
