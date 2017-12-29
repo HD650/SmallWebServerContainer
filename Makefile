@@ -1,13 +1,13 @@
 CC=g++
-CFLAGS=-g
-DEPS =  
-OBJ = httpd.o 
+CFLAGS=-g -I.
+DEPS = Server.h util.h
+OBJ = main.o Server.o util.o 
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-httpd: $(OBJ)
+main: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
-	rm $(OBJ) httpd
+	rm $(OBJ) main
