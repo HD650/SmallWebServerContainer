@@ -14,7 +14,7 @@ bool return_file(int client, char* file_name)
 	file_length=ftell(file);
 	//printf("file size:%d bytes.\n",file_length);
 	fseek(file,0,SEEK_SET);
-	
+
 	char return_buf[1024];
 	int send_count=0;
 	int curr_send=0;
@@ -65,10 +65,9 @@ int get_line(int sock, char *buf, int size)
     return(i);
 }
 
-bool parse_url(char* method,char* path,int sock_id){
+void parse_url(char* method,char* path,int sock_id){
 	char buf[2048];
-	size_t i=0,j=0;
-	size_t num_char;
+	size_t i=0,j=0,num_char;
 	num_char=get_line(sock_id,buf,sizeof(buf));
 	while(buf[i]!=' '&&(i<num_char)){
 		method[i]=buf[i];
@@ -81,9 +80,7 @@ bool parse_url(char* method,char* path,int sock_id){
 		j++;
 	}
 	while(buf[j]!=' '&&(j<num_char)){
-			path[i]=buf[j];
-			i++;j++;
+			path[i++]=buf[j++];
 	}
 	path[i]='\0';
-	return true;
 }

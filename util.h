@@ -12,5 +12,7 @@
 
 bool return_file(int client, char* file_name);
 int get_line(int sock, char *buf, int size);
-bool parse_url(char* method,char* path,int sock_id);
+
+//extract method and path in the Request Headers List.
+void parse_url(char* method,char* path,int sock_id);
 #endif
