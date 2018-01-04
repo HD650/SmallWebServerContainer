@@ -50,12 +50,12 @@ void* worker(void* param)
 	char method[8],path[1024];
 	
 	parse_url(method,path,input.cli_sock);
-	//printf("[thread%d]method: %s\n",input.pid,method);
-	//printf("[thread%d]path: %s\n",input.pid,path);
+	printf("[thread%d]method: %s\n",input.pid,method);
+	printf("[thread%d]path: %s\n",input.pid,path);
 	
 	char *ip = inet_ntoa(input.cli_addr.sin_addr);
-	//printf("client ip:%s\n",ip);
-	//printf("%d\n",cli_addr.sin_port);
+	printf("client ip:%s\n",ip);
+	printf("%d\n",input.cli_addr.sin_port);
 	char buf[1024];
 	strcpy(buf,"HTTP/1.0 200 OK\r\n");
 	send(input.cli_sock,buf,strlen(buf),0);

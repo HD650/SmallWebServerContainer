@@ -49,7 +49,7 @@ void ThreadPool::join_pool()
 		}
 		else
 		{
-			sleep(1);
+			
 		}
 		pool_mutex.unlock();
 	}

@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS= -std=c++11 -g -I. -lpthread
 DEPS = Server.h util.h
-OBJ = main.o Server.o util.o ThreadPool.o
+OBJ = main.o Server.o util.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c $(CFLAGS) -o $@ $< 
