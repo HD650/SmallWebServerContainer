@@ -3,20 +3,19 @@
 
 #include "util.h"
 #include "thread.h"
+#include <sys/event.h>
 #include <exception>
 
 using namespace std;
 
 struct worker_param
 {
-	worker_param(int& _cli_sock,struct sockaddr_in& _cli_addr,pthread_t& _pid)
+	worker_param(int& _cli_sock,struct sockaddr_in& _cli_addr)
 	{
 		cli_sock=_cli_sock;
 		cli_addr=_cli_addr;
-		pid=_pid;
 	};
 	int cli_sock;
-	pthread_t pid;
 	struct sockaddr_in cli_addr;
 };
 

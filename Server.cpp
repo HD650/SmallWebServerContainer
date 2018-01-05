@@ -1,5 +1,6 @@
 #include "Server.h"
 
+//TODO: change to epoll mode
 void Server::start_server()
 {
 	printf("Start a socket.\n");
@@ -20,10 +21,58 @@ void Server::start_server()
 	listen(listen_sock,queue_len);
 	printf("listen on the port.\n");
 
+	//init kqueue
+	int kq = kqueue();
+	//we only need to add a event one time, so size 1 is enough
+	struct kevent changes[1];
+	//to get the ready sockets, we need a lot slots since there may be a lots client at a time
+	struct kevent events[1000];
+	//set the first event as our listening  socket
+	EV_SET(&changes[0],listen_sock,EVFILT_READ,EV_ADD,0,0,NULL);
+	//add the base listening socket event to kqueue, this line will not block
+	int ret=kevent(kq,changes,1,NULL,0,NULL); 
+
+	//the ready socket file descriptor
+	int fd;
+	//the size of the ready socket
+	int data;
 	try
 	{
+		
 		while(1)
 		{
+			//wait on all the kqueue
+			ret=kevent(kq,NULL,0,events,1000,NULL);
+			//manage all ready sockets
+			for(int i=0;i<ret;i++)
+			{
+				fd=events[i].ident; 
+		       	data=events[i].data; 
+				struct sockaddr_in cli_addr;
+				//if the listen socket is ready, that means there are new clients (one or more)
+				if ((fd==listen_sock))
+				{
+					//for every new client, registe them in the kqueue
+					for(int ii=0;ii<data;ii++)
+					{
+						int cli_sock;
+						unsigned int cli_length;
+						cli_sock=accept(fd,(struct sockaddr*)&cli_addr,&cli_length);
+						EV_SET(&changes[0],cli_sock,EVFILT_READ,EV_ADD,0,0,NULL);
+						kevent(kq,changes,1,NULL,0,NULL); 
+					}
+				}
+				//old client, but new request, handle the request with worker function
+				else
+				{
+					//old client
+					struct worker_param cli_param(fd,cli_addr);
+					//TODO: use multi thread here to test the effeicient
+					worker((void*)&cli_param);
+				}
+			}
+			//old code for multi thread server
+			/*
 			struct sockaddr_in cli_addr;
 			int cli_sock;
 			unsigned int cli_length;
@@ -34,12 +83,14 @@ void Server::start_server()
 			struct worker_param cli_param(cli_sock,cli_addr,pid);
 			//this->worker((void*)&cli_param);
 			pthread_create(&pid,NULL,worker,(void*)&cli_param);
+			*/
 		}
 	}
 	catch(exception& error)
 	{
 		printf("%s\n",error.what());
 		close(listen_sock);
+
 	}
 	return;
 }
@@ -50,8 +101,8 @@ void* worker(void* param)
 	char method[8],path[1024];
 	
 	parse_url(method,path,input.cli_sock);
-	printf("[thread%d]method: %s\n",input.pid,method);
-	printf("[thread%d]path: %s\n",input.pid,path);
+	printf("method: %s\n",method);
+	printf("path: %s\n",path);
 	
 	char *ip = inet_ntoa(input.cli_addr.sin_addr);
 	printf("client ip:%s\n",ip);
