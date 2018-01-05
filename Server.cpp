@@ -47,7 +47,16 @@ void Server::start_server()
 			for(int i=0;i<ret;i++)
 			{
 				fd=events[i].ident; 
-		       	data=events[i].data; 
+		       	data=events[i].data;
+		       	//strange bug here, sometime there will be a read-ready file descriptor with 0 data
+		       	//and it will constantly issued as read-ready by kqueue (but it's not ready, there is no data)
+		       	//so we just close it, don't let it waste our computational resource
+		       	if(data==0)
+		       	{
+		       		close(fd);
+		       		continue;
+		       	}
+
 				struct sockaddr_in cli_addr;
 				//if the listen socket is ready, that means there are new clients (one or more)
 				if ((fd==listen_sock))
@@ -90,7 +99,6 @@ void Server::start_server()
 	{
 		printf("%s\n",error.what());
 		close(listen_sock);
-
 	}
 	return;
 }
@@ -104,6 +112,10 @@ void* worker(void* param)
 	printf("method: %s\n",method);
 	printf("path: %s\n",path);
 	
+	//if something is wrong, return and do not occupy the thread
+	if(method[0]=='\0')
+		return 0;
+
 	char *ip = inet_ntoa(input.cli_addr.sin_addr);
 	printf("client ip:%s\n",ip);
 	printf("%d\n",input.cli_addr.sin_port);
